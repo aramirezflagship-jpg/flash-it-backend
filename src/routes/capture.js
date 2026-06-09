@@ -13,27 +13,21 @@ router.post('/', upload.single('image'), async (req, res) => {
   try {
     const { eventId, theme } = req.body;
 
-    if (!req.file) {
-      return res.status(400).json({ error: 'No image file provided' });
-    }
-    if (!eventId) {
-      return res.status(400).json({ error: 'eventId is required' });
-    }
-    if (!theme) {
-      return res.status(400).json({ error: 'theme is required' });
-    }
+    if (!req.file) return res.status(400).json({ error: 'No image file provided' });
+    if (!eventId)  return res.status(400).json({ error: 'eventId is required' });
+    if (!theme)    return res.status(400).json({ error: 'theme is required' });
 
     const events = readEvents();
     const event = events.find((e) => e.id === eventId);
-    if (!event) {
-      return res.status(404).json({ error: `Event '${eventId}' not found` });
-    }
+    if (!event) return res.status(404).json({ error: `Event '${eventId}' not found` });
 
     const imageBuffer = req.file.buffer;
 
-    const cutoutBuffer = await removebg.removeBackground(imageBuffer);
-
-    const backgroundBuffer = await aiTransform.generateBackground(imageBuffer, theme);
+    // Run background removal and background generation in parallel — cuts total time ~50%
+    const [cutoutBuffer, backgroundBuffer] = await Promise.all([
+      removebg.removeBackground(imageBuffer),
+      aiTransform.generateBackground(theme),
+    ]);
 
     const themes = require('../../config/themes.json');
     const themeConfig = themes[theme] || null;

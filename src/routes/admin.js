@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { randomUUID } = require('crypto');
 const adminAuth = require('../middleware/adminAuth');
+const { prebakeTheme } = require('../services/ai-transform');
 
 const EVENTS_FILE = path.resolve(__dirname, '../../config/events.json');
 
@@ -67,6 +68,34 @@ router.get('/events/:eventId/usage', (req, res) => {
     photoCount: (event.usage || []).length,
     photos: event.usage || [],
   });
+});
+
+// Pre-bake backgrounds for a theme (run once before an event for fastest results)
+// POST /admin/prebake/:themeId?count=5
+router.post('/prebake/:themeId', adminAuth, async (req, res) => {
+  try {
+    const count = Math.min(parseInt(req.query.count) || 5, 10);
+    const bgCache = await prebakeTheme(req.params.themeId, count);
+    res.json({ themeId: req.params.themeId, cached: bgCache.length, urls: bgCache });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Pre-bake ALL themes at once
+// POST /admin/prebake-all?count=3
+router.post('/prebake-all', adminAuth, async (req, res) => {
+  try {
+    const count = Math.min(parseInt(req.query.count) || 3, 5);
+    const themes = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../config/themes.json'), 'utf8'));
+    const results = {};
+    for (const themeId of Object.keys(themes)) {
+      results[themeId] = await prebakeTheme(themeId, count);
+    }
+    res.json({ message: 'All themes pre-baked', results });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
