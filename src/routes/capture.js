@@ -35,7 +35,9 @@ router.post('/', upload.single('image'), async (req, res) => {
 
     const backgroundBuffer = await aiTransform.generateBackground(imageBuffer, theme);
 
-    const finalBuffer = await branding.composite(cutoutBuffer, backgroundBuffer, event);
+    const themes = require('../../config/themes.json');
+    const themeConfig = themes[theme] || null;
+    const finalBuffer = await branding.composite(cutoutBuffer, backgroundBuffer, event, themeConfig);
 
     const { photoUrl, qrUrl } = await storage.uploadPhoto(finalBuffer, eventId);
 

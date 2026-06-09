@@ -1,47 +1,107 @@
 {
   "elegant-wedding": {
     "id": "elegant-wedding",
-    "name": {
-      "en": "Elegant Wedding",
-      "es": "Boda Elegante"
+    "name": { "en": "Elegant Wedding", "es": "Boda Elegante" },
+    "prompt": "A breathtaking beach wedding venue at sunset, white sand, turquoise ocean, floral arch with white roses, warm golden light, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing matching funny oversized wedding hats and bow ties",
+    "banner": {
+      "en": "We're Ready for the Honeymoon! 🥂",
+      "es": "¡Listos para la Luna de Miel! 🥂",
+      "position": "top",
+      "bgColor": "#1a0a2e",
+      "textColor": "#f5c842",
+      "accentColor": "#c8a951"
     },
-    "prompt": "A breathtaking wedding venue interior with soft white and gold decor, cascading floral arrangements of white roses and peonies, warm candlelight ambiance, elegant chandeliers, sheer fabric draping, ultra-realistic photography, bokeh background, 4k quality",
     "previewEmoji": "💍"
   },
   "corporate-glow": {
     "id": "corporate-glow",
-    "name": {
-      "en": "Corporate Glow",
-      "es": "Brillo Corporativo"
+    "name": { "en": "Corporate Glow", "es": "Brillo Corporativo" },
+    "prompt": "A sleek modern corporate stage with a giant magazine cover backdrop, spotlights, city skyline at dusk, polished marble floors, luxury professional atmosphere, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing formal business attire with oversized gold star badges",
+    "banner": {
+      "en": "Employee of the Month! ⭐",
+      "es": "¡Empleado del Mes! ⭐",
+      "position": "top",
+      "bgColor": "#0a1628",
+      "textColor": "#ffffff",
+      "accentColor": "#4a90d9"
     },
-    "prompt": "A sleek modern corporate office environment with floor-to-ceiling glass windows overlooking a city skyline at dusk, soft ambient blue and white lighting, polished marble floors, minimalist luxury aesthetic, professional atmosphere, ultra-realistic photography, 4k quality",
     "previewEmoji": "🏙️"
   },
   "xv-anos-royalty": {
     "id": "xv-anos-royalty",
-    "name": {
-      "en": "XV Años Royalty",
-      "es": "Realeza de XV Años"
+    "name": { "en": "XV Años Royalty", "es": "Realeza de XV Años" },
+    "prompt": "A grand fairy-tale castle ballroom with vibrant pink and gold decorations, giant floral arch with roses and orchids, glittering chandeliers, magical princess atmosphere, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing sparkling tiaras and royal princess crowns",
+    "banner": {
+      "en": "Happy 15th Birthday, Princess! 👑",
+      "es": "¡Felices 15 Años, Princesa! 👑",
+      "position": "top",
+      "bgColor": "#2d0a3e",
+      "textColor": "#ffcfe8",
+      "accentColor": "#e040fb"
     },
-    "prompt": "A grand quinceañera ballroom with vibrant pink and gold decorations, giant floral arch backdrop with roses and orchids, glittering fairy lights, ornate golden throne chair, tiara and crown motifs, magical princess atmosphere, ultra-realistic photography, bokeh lights, 4k quality",
     "previewEmoji": "👑"
   },
   "tropical-fiesta": {
     "id": "tropical-fiesta",
-    "name": {
-      "en": "Tropical Fiesta",
-      "es": "Fiesta Tropical"
+    "name": { "en": "Tropical Fiesta", "es": "Fiesta Tropical" },
+    "prompt": "A vibrant tropical beach party with turquoise ocean, white sand, colorful paper lanterns, lush palm trees with string lights, marigold and hibiscus flowers, golden sunset sky, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing colorful oversized sombreros and flower leis",
+    "banner": {
+      "en": "Que Viva la Fiesta! 🌴",
+      "es": "¡Que Viva la Fiesta! 🌴",
+      "position": "top",
+      "bgColor": "#1a3a1a",
+      "textColor": "#ffe066",
+      "accentColor": "#ff6b35"
     },
-    "prompt": "A vibrant tropical beach party setting with turquoise ocean waves, white sand beach, colorful paper lanterns and streamers, lush palm trees decorated with string lights, festive marigold and hibiscus flowers, golden sunset sky, joyful fiesta atmosphere, ultra-realistic photography, 4k quality",
     "previewEmoji": "🌺"
   },
   "futuristic-neon": {
     "id": "futuristic-neon",
-    "name": {
-      "en": "Futuristic Neon",
-      "es": "Neón Futurista"
+    "name": { "en": "Futuristic Neon", "es": "Neón Futurista" },
+    "prompt": "A cyberpunk futuristic cityscape at night with electric neon signs in pink, blue and purple, rain-slicked reflective streets, holographic projections, towering skyscrapers, sci-fi atmosphere, cinematic lighting, 4k quality",
+    "propsPrompt": "wearing futuristic neon-lit cyber glasses and holographic accessories",
+    "banner": {
+      "en": "Welcome to the Future! ⚡",
+      "es": "¡Bienvenido al Futuro! ⚡",
+      "position": "top",
+      "bgColor": "#0a0a1a",
+      "textColor": "#00f5ff",
+      "accentColor": "#bf00ff"
     },
-    "prompt": "A cyberpunk futuristic cityscape at night with electric neon signs in pink, blue, and purple, rain-slicked reflective streets, holographic projections floating in the air, towering skyscrapers with glowing windows, fog machine haze, sci-fi atmosphere, ultra-realistic photography, cinematic lighting, 4k quality",
     "previewEmoji": "🌆"
+  },
+  "birthday-bash": {
+    "id": "birthday-bash",
+    "name": { "en": "Birthday Bash", "es": "Fiesta de Cumpleaños" },
+    "prompt": "A vibrant birthday party venue with colorful balloons, confetti raining down, neon party lights, disco ball, cake table with candles, festive streamers, Hollywood glamour atmosphere, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing colorful oversized party hats and holding birthday noisemakers",
+    "banner": {
+      "en": "Happy Birthday! 🎂",
+      "es": "¡Feliz Cumpleaños! 🎂",
+      "position": "top",
+      "bgColor": "#1a0a0a",
+      "textColor": "#ff6b6b",
+      "accentColor": "#ffd93d"
+    },
+    "previewEmoji": "🎂"
+  },
+  "holiday-magic": {
+    "id": "holiday-magic",
+    "name": { "en": "Holiday Magic", "es": "Magia Navideña" },
+    "prompt": "A magical Christmas winter wonderland with snow-covered landscape, giant decorated Christmas tree with golden lights, snowflakes falling, cozy warm cabin in background, festive red and green decorations, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing funny oversized Santa hats and Christmas elf ears",
+    "banner": {
+      "en": "Happy Holidays! 🎄",
+      "es": "¡Feliz Navidad! 🎄",
+      "position": "top",
+      "bgColor": "#0a1a0a",
+      "textColor": "#ffffff",
+      "accentColor": "#ff2020"
+    },
+    "previewEmoji": "🎄"
   }
 }

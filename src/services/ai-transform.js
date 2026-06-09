@@ -22,11 +22,15 @@ async function generateBackground(imageBuffer, themeId) {
   const base64Image = imageBuffer.toString('base64');
   const dataUri = `data:image/jpeg;base64,${base64Image}`;
 
+  const fullPrompt = theme.propsPrompt
+    ? `${theme.prompt}. The people in the photo are ${theme.propsPrompt}.`
+    : theme.prompt;
+
   const result = await fal.subscribe('fal-ai/bria/background/replace', {
     input: {
       image_url: dataUri,
-      prompt: theme.prompt,
-      negative_prompt: 'blurry, low quality, distorted',
+      prompt: fullPrompt,
+      negative_prompt: 'blurry, low quality, distorted, remove person, remove face',
       num_inference_steps: 30,
       guidance_scale: 7.5,
       num_images: 1,
