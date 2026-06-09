@@ -12,7 +12,14 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://flash-it-kiosk.vercel.app',
+    'http://localhost:5173',
+  ],
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'x-admin-key'],
+}));
 app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
