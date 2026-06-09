@@ -1,0 +1,47 @@
+{
+  "elegant-wedding": {
+    "id": "elegant-wedding",
+    "name": {
+      "en": "Elegant Wedding",
+      "es": "Boda Elegante"
+    },
+    "prompt": "A breathtaking wedding venue interior with soft white and gold decor, cascading floral arrangements of white roses and peonies, warm candlelight ambiance, elegant chandeliers, sheer fabric draping, ultra-realistic photography, bokeh background, 4k quality",
+    "previewEmoji": "💍"
+  },
+  "corporate-glow": {
+    "id": "corporate-glow",
+    "name": {
+      "en": "Corporate Glow",
+      "es": "Brillo Corporativo"
+    },
+    "prompt": "A sleek modern corporate office environment with floor-to-ceiling glass windows overlooking a city skyline at dusk, soft ambient blue and white lighting, polished marble floors, minimalist luxury aesthetic, professional atmosphere, ultra-realistic photography, 4k quality",
+    "previewEmoji": "🏙️"
+  },
+  "xv-anos-royalty": {
+    "id": "xv-anos-royalty",
+    "name": {
+      "en": "XV Años Royalty",
+      "es": "Realeza de XV Años"
+    },
+    "prompt": "A grand quinceañera ballroom with vibrant pink and gold decorations, giant floral arch backdrop with roses and orchids, glittering fairy lights, ornate golden throne chair, tiara and crown motifs, magical princess atmosphere, ultra-realistic photography, bokeh lights, 4k quality",
+    "previewEmoji": "👑"
+  },
+  "tropical-fiesta": {
+    "id": "tropical-fiesta",
+    "name": {
+      "en": "Tropical Fiesta",
+      "es": "Fiesta Tropical"
+    },
+    "prompt": "A vibrant tropical beach party setting with turquoise ocean waves, white sand beach, colorful paper lanterns and streamers, lush palm trees decorated with string lights, festive marigold and hibiscus flowers, golden sunset sky, joyful fiesta atmosphere, ultra-realistic photography, 4k quality",
+    "previewEmoji": "🌺"
+  },
+  "futuristic-neon": {
+    "id": "futuristic-neon",
+    "name": {
+      "en": "Futuristic Neon",
+      "es": "Neón Futurista"
+    },
+    "prompt": "A cyberpunk futuristic cityscape at night with electric neon signs in pink, blue, and purple, rain-slicked reflective streets, holographic projections floating in the air, towering skyscrapers with glowing windows, fog machine haze, sci-fi atmosphere, ultra-realistic photography, cinematic lighting, 4k quality",
+    "previewEmoji": "🌆"
+  }
+}
