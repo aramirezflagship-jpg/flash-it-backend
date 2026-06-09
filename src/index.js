@@ -25,7 +25,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'Flash-It API', version: '1.0.0', timestamp: new Date().toISOString() });
+  const keys = {
+    FAL_API_KEY:          !!process.env.FAL_API_KEY && !process.env.FAL_API_KEY.startsWith('your_'),
+    R2_ACCOUNT_ID:        !!process.env.R2_ACCOUNT_ID && !process.env.R2_ACCOUNT_ID.startsWith('your_'),
+    R2_ACCESS_KEY_ID:     !!process.env.R2_ACCESS_KEY_ID && !process.env.R2_ACCESS_KEY_ID.startsWith('your_'),
+    R2_SECRET_ACCESS_KEY: !!process.env.R2_SECRET_ACCESS_KEY && !process.env.R2_SECRET_ACCESS_KEY.startsWith('your_'),
+    R2_BUCKET_NAME:       !!process.env.R2_BUCKET_NAME,
+    R2_PUBLIC_URL:        !!process.env.R2_PUBLIC_URL && !process.env.R2_PUBLIC_URL.startsWith('https://your'),
+    TWILIO_ACCOUNT_SID:   !!process.env.TWILIO_ACCOUNT_SID && !process.env.TWILIO_ACCOUNT_SID.startsWith('your_'),
+  };
+  const allReady = Object.values(keys).every(Boolean);
+  res.status(allReady ? 200 : 503).json({
+    status: allReady ? 'ok' : 'missing_config',
+    service: 'Flash-It API',
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    keys,
+  });
 });
 
 app.use('/capture', captureRouter);

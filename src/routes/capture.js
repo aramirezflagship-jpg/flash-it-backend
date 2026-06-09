@@ -24,16 +24,28 @@ router.post('/', upload.single('image'), async (req, res) => {
     const imageBuffer = req.file.buffer;
 
     // Run background removal and background generation in parallel — cuts total time ~50%
-    const [cutoutBuffer, backgroundBuffer] = await Promise.all([
-      removebg.removeBackground(imageBuffer),
-      aiTransform.generateBackground(theme),
-    ]);
+    let cutoutBuffer, backgroundBuffer;
+    try {
+      [cutoutBuffer, backgroundBuffer] = await Promise.all([
+        removebg.removeBackground(imageBuffer),
+        aiTransform.generateBackground(theme),
+      ]);
+    } catch (aiErr) {
+      console.error('AI pipeline error:', aiErr);
+      return res.status(502).json({ error: `AI processing failed: ${aiErr.message}` });
+    }
 
     const themes = require('../../config/themes.json');
     const themeConfig = themes[theme] || null;
     const finalBuffer = await branding.composite(cutoutBuffer, backgroundBuffer, event, themeConfig);
 
-    const { photoUrl, qrUrl } = await storage.uploadPhoto(finalBuffer, eventId);
+    let photoUrl, qrUrl;
+    try {
+      ({ photoUrl, qrUrl } = await storage.uploadPhoto(finalBuffer, eventId));
+    } catch (storageErr) {
+      console.error('Storage error:', storageErr);
+      return res.status(502).json({ error: `Storage failed: ${storageErr.message}` });
+    }
 
     event.usage = event.usage || [];
     event.usage.push({ photoUrl, createdAt: new Date().toISOString() });
