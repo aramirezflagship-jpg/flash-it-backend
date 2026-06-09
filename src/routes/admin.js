@@ -4,6 +4,7 @@ const path = require('path');
 const { randomUUID } = require('crypto');
 const adminAuth = require('../middleware/adminAuth');
 const { prebakeTheme, getMemoryCache } = require('../services/ai-transform');
+const marketing = require('../services/marketing');
 
 const EVENTS_FILE = path.resolve(__dirname, '../../config/events.json');
 
@@ -133,6 +134,40 @@ router.post('/prebake-all', adminAuth, async (req, res) => {
       results[themeId] = await prebakeTheme(themeId, count);
     }
     res.json({ message: 'All themes pre-baked', results });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /admin/contacts — list all captured guest contacts
+router.get('/contacts', adminAuth, (req, res) => {
+  res.json(marketing.getContacts());
+});
+
+// POST /admin/contacts/:contactId/promo — manually send promo to a contact
+router.post('/contacts/:contactId/promo', adminAuth, async (req, res) => {
+  try {
+    const result = await marketing.sendPromo(req.params.contactId);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /admin/contacts/promo-all — send promo to all contacts who haven't received one
+router.post('/contacts/promo-all', adminAuth, async (req, res) => {
+  try {
+    const contacts = marketing.getContacts().filter(c => !c.promoSentAt && !c.optedOut && c.phone);
+    const results = [];
+    for (const c of contacts) {
+      try {
+        await marketing.sendPromo(c.id);
+        results.push({ id: c.id, phone: c.phone, sent: true });
+      } catch (err) {
+        results.push({ id: c.id, phone: c.phone, sent: false, error: err.message });
+      }
+    }
+    res.json({ total: contacts.length, results });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
