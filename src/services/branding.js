@@ -7,7 +7,7 @@ const OUTPUT_HEIGHT = 1200;
 const LOGO_MAX_WIDTH = 200;
 const LOGO_MAX_HEIGHT = 80;
 const LOGO_MARGIN = 24;
-const DEFAULT_LOGO_PATH = path.resolve(__dirname, '../../assets/flash-it-logo.png');
+const DEFAULT_LOGO_PATH = path.resolve(__dirname, '../../assets/flash-it-logo.svg');
 
 async function composite(cutoutBuffer, backgroundBuffer, event) {
   const background = await sharp(backgroundBuffer)

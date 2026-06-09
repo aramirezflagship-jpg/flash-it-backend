@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { randomUUID } = require('crypto');
+const adminAuth = require('../middleware/adminAuth');
 
 const EVENTS_FILE = path.resolve(__dirname, '../../config/events.json');
 
@@ -24,12 +25,12 @@ function generateId(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now();
 }
 
-router.get('/events', (req, res) => {
+router.get('/events', adminAuth, (req, res) => {
   const events = readEvents();
   res.json(events.map(({ usage, ...e }) => ({ ...e, photoCount: (usage || []).length })));
 });
 
-router.post('/events', (req, res) => {
+router.post('/events', adminAuth, (req, res) => {
   const { name, logo, themes, deliveryChannels } = req.body;
 
   if (!name) {
