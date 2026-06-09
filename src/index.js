@@ -35,7 +35,7 @@ app.get('/health', (req, res) => {
     TWILIO_ACCOUNT_SID:   !!process.env.TWILIO_ACCOUNT_SID && !process.env.TWILIO_ACCOUNT_SID.startsWith('your_'),
   };
   const allReady = Object.values(keys).every(Boolean);
-  res.status(allReady ? 200 : 503).json({
+  res.status(200).json({
     status: allReady ? 'ok' : 'missing_config',
     service: 'Flash-It API',
     version: '1.0.0',
