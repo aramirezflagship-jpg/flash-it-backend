@@ -1,23 +1,10 @@
-const { fal } = require('@fal-ai/client');
-const axios = require('axios');
-
-fal.config({ credentials: process.env.FAL_API_KEY });
+const { removeBackground: imglyRemoveBg } = require('@imgly/background-removal-node');
 
 async function removeBackground(imageBuffer) {
-  const base64Image = imageBuffer.toString('base64');
-  const dataUri = `data:image/jpeg;base64,${base64Image}`;
-
-  const result = await fal.subscribe('fal-ai/imageutils/rembg', {
-    input: {
-      image_url: dataUri,
-      sync_mode: true,
-    },
-    logs: false,
-  });
-
-  const imageUrl = result.data.image.url;
-  const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-  return Buffer.from(response.data);
+  const blob = new Blob([imageBuffer], { type: 'image/jpeg' });
+  const resultBlob = await imglyRemoveBg(blob, { output: { format: 'image/png' } });
+  const arrayBuffer = await resultBlob.arrayBuffer();
+  return Buffer.from(arrayBuffer);
 }
 
 module.exports = { removeBackground };
