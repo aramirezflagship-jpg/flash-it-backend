@@ -1,107 +1,192 @@
 {
   "elegant-wedding": {
     "id": "elegant-wedding",
-    "name": { "en": "Elegant Wedding", "es": "Boda Elegante" },
+    "category": "wedding",
+    "name": { "en": "Beach Wedding", "es": "Boda en la Playa" },
     "prompt": "A breathtaking beach wedding venue at sunset, white sand, turquoise ocean, floral arch with white roses, warm golden light, ultra-realistic photography, 4k quality",
     "propsPrompt": "wearing matching funny oversized wedding hats and bow ties",
-    "banner": {
-      "en": "We're Ready for the Honeymoon! 🥂",
-      "es": "¡Listos para la Luna de Miel! 🥂",
-      "position": "top",
-      "bgColor": "#1a0a2e",
-      "textColor": "#f5c842",
-      "accentColor": "#c8a951"
-    },
-    "previewEmoji": "💍"
+    "banner": { "en": "We're Ready for the Honeymoon! 🥂", "es": "¡Listos para la Luna de Miel! 🥂", "position": "top", "bgColor": "#1a0a2e", "textColor": "#f5c842", "accentColor": "#c8a951" },
+    "previewEmoji": "🏖️",
+    "bgCache": []
   },
-  "corporate-glow": {
-    "id": "corporate-glow",
-    "name": { "en": "Corporate Glow", "es": "Brillo Corporativo" },
-    "prompt": "A sleek modern corporate stage with a giant magazine cover backdrop, spotlights, city skyline at dusk, polished marble floors, luxury professional atmosphere, ultra-realistic photography, 4k quality",
-    "propsPrompt": "wearing formal business attire with oversized gold star badges",
-    "banner": {
-      "en": "Employee of the Month! ⭐",
-      "es": "¡Empleado del Mes! ⭐",
-      "position": "top",
-      "bgColor": "#0a1628",
-      "textColor": "#ffffff",
-      "accentColor": "#4a90d9"
-    },
-    "previewEmoji": "🏙️"
+  "garden-wedding": {
+    "id": "garden-wedding",
+    "category": "wedding",
+    "name": { "en": "Garden Wedding", "es": "Boda en el Jardín" },
+    "prompt": "A stunning outdoor garden wedding with blooming roses and peonies, ivy-covered archway, string lights, lush greenery, soft natural sunlight, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing flower crowns and holding bouquets of roses",
+    "banner": { "en": "Love is in the Air! 💐", "es": "¡El Amor Está en el Aire! 💐", "position": "top", "bgColor": "#0a1a0a", "textColor": "#ffffff", "accentColor": "#7ec850" },
+    "previewEmoji": "🌹",
+    "bgCache": []
+  },
+  "paris-wedding": {
+    "id": "paris-wedding",
+    "category": "wedding",
+    "name": { "en": "Paris Romance", "es": "Romance en París" },
+    "prompt": "The Eiffel Tower at night with golden sparkling lights, romantic Parisian street cafe, cobblestone, red roses, warm ambient glow, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing a beret and holding a single red rose",
+    "banner": { "en": "Ooh La La, We Said Yes! 🗼", "es": "¡Ooh La La, Dijimos Sí! 🗼", "position": "top", "bgColor": "#1a0a0a", "textColor": "#ffcfe8", "accentColor": "#e91e8c" },
+    "previewEmoji": "🗼",
+    "bgCache": []
   },
   "xv-anos-royalty": {
     "id": "xv-anos-royalty",
-    "name": { "en": "XV Años Royalty", "es": "Realeza de XV Años" },
+    "category": "xv",
+    "name": { "en": "XV Royalty Castle", "es": "Castillo de XV Años" },
     "prompt": "A grand fairy-tale castle ballroom with vibrant pink and gold decorations, giant floral arch with roses and orchids, glittering chandeliers, magical princess atmosphere, ultra-realistic photography, 4k quality",
     "propsPrompt": "wearing sparkling tiaras and royal princess crowns",
-    "banner": {
-      "en": "Happy 15th Birthday, Princess! 👑",
-      "es": "¡Felices 15 Años, Princesa! 👑",
-      "position": "top",
-      "bgColor": "#2d0a3e",
-      "textColor": "#ffcfe8",
-      "accentColor": "#e040fb"
-    },
-    "previewEmoji": "👑"
+    "banner": { "en": "Happy 15th Birthday, Princess! 👑", "es": "¡Felices 15 Años, Princesa! 👑", "position": "top", "bgColor": "#2d0a3e", "textColor": "#ffcfe8", "accentColor": "#e040fb" },
+    "previewEmoji": "👑",
+    "bgCache": []
   },
-  "tropical-fiesta": {
-    "id": "tropical-fiesta",
-    "name": { "en": "Tropical Fiesta", "es": "Fiesta Tropical" },
-    "prompt": "A vibrant tropical beach party with turquoise ocean, white sand, colorful paper lanterns, lush palm trees with string lights, marigold and hibiscus flowers, golden sunset sky, ultra-realistic photography, 4k quality",
-    "propsPrompt": "wearing colorful oversized sombreros and flower leis",
-    "banner": {
-      "en": "Que Viva la Fiesta! 🌴",
-      "es": "¡Que Viva la Fiesta! 🌴",
-      "position": "top",
-      "bgColor": "#1a3a1a",
-      "textColor": "#ffe066",
-      "accentColor": "#ff6b35"
-    },
-    "previewEmoji": "🌺"
+  "xv-disney": {
+    "id": "xv-disney",
+    "category": "xv",
+    "name": { "en": "Disney Princess XV", "es": "XV Años Disney" },
+    "prompt": "A magical Disney-style enchanted castle with fireworks, pink and purple sky, sparkling fairy dust, magical carriages, storybook fantasy atmosphere, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing a sparkly Disney princess tiara and a magical wand",
+    "banner": { "en": "A Dream Come True! ✨", "es": "¡Un Sueño Hecho Realidad! ✨", "position": "top", "bgColor": "#1a0a3e", "textColor": "#ffe8ff", "accentColor": "#bf00ff" },
+    "previewEmoji": "🏰",
+    "bgCache": []
   },
-  "futuristic-neon": {
-    "id": "futuristic-neon",
-    "name": { "en": "Futuristic Neon", "es": "Neón Futurista" },
-    "prompt": "A cyberpunk futuristic cityscape at night with electric neon signs in pink, blue and purple, rain-slicked reflective streets, holographic projections, towering skyscrapers, sci-fi atmosphere, cinematic lighting, 4k quality",
-    "propsPrompt": "wearing futuristic neon-lit cyber glasses and holographic accessories",
-    "banner": {
-      "en": "Welcome to the Future! ⚡",
-      "es": "¡Bienvenido al Futuro! ⚡",
-      "position": "top",
-      "bgColor": "#0a0a1a",
-      "textColor": "#00f5ff",
-      "accentColor": "#bf00ff"
-    },
-    "previewEmoji": "🌆"
+  "xv-floral": {
+    "id": "xv-floral",
+    "category": "xv",
+    "name": { "en": "Floral Fantasy XV", "es": "XV Años Floral" },
+    "prompt": "A breathtaking floral wonderland with thousands of pink roses, orchids and peonies forming a tunnel arch, golden hour light filtering through petals, dreamy romantic atmosphere, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing an elegant floral crown of roses and pearls",
+    "banner": { "en": "Blooming into Womanhood! 🌸", "es": "¡Floreciendo como Mujer! 🌸", "position": "top", "bgColor": "#2d1a1a", "textColor": "#ffb3c6", "accentColor": "#ff6b9d" },
+    "previewEmoji": "🌸",
+    "bgCache": []
+  },
+  "corporate-glow": {
+    "id": "corporate-glow",
+    "category": "corporate",
+    "name": { "en": "Employee of the Month", "es": "Empleado del Mes" },
+    "prompt": "A sleek modern corporate stage with a giant magazine cover backdrop, spotlights, city skyline at dusk, polished marble floors, luxury professional atmosphere, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing formal business attire with oversized gold star employee badges",
+    "banner": { "en": "Employee of the Month! ⭐", "es": "¡Empleado del Mes! ⭐", "position": "top", "bgColor": "#0a1628", "textColor": "#ffffff", "accentColor": "#4a90d9" },
+    "previewEmoji": "🏙️",
+    "bgCache": []
+  },
+  "corporate-magazine": {
+    "id": "corporate-magazine",
+    "category": "corporate",
+    "name": { "en": "Magazine Cover", "es": "Portada de Revista" },
+    "prompt": "A high-fashion magazine cover style backdrop, bold graphic design frame, studio lighting, elegant white and gold tones, professional photographer setup, ultra-realistic photography, 4k quality",
+    "propsPrompt": "posing confidently with a professional smile",
+    "banner": { "en": "Cover Story! 📰", "es": "¡La Nota del Año! 📰", "position": "top", "bgColor": "#0a0a0a", "textColor": "#ffd700", "accentColor": "#ffffff" },
+    "previewEmoji": "📰",
+    "bgCache": []
+  },
+  "corporate-stadium": {
+    "id": "corporate-stadium",
+    "category": "corporate",
+    "name": { "en": "Stadium Champion", "es": "Campeón del Estadio" },
+    "prompt": "A roaring packed sports stadium at night, bright floodlights, confetti falling, championship scoreboard, electric crowd energy, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing a gold championship medal and holding a trophy",
+    "banner": { "en": "We Are the Champions! 🏆", "es": "¡Somos los Campeones! 🏆", "position": "top", "bgColor": "#0a1a0a", "textColor": "#ffd700", "accentColor": "#ff6b00" },
+    "previewEmoji": "🏆",
+    "bgCache": []
   },
   "birthday-bash": {
     "id": "birthday-bash",
+    "category": "birthday",
     "name": { "en": "Birthday Bash", "es": "Fiesta de Cumpleaños" },
-    "prompt": "A vibrant birthday party venue with colorful balloons, confetti raining down, neon party lights, disco ball, cake table with candles, festive streamers, Hollywood glamour atmosphere, ultra-realistic photography, 4k quality",
+    "prompt": "A vibrant birthday party venue with colorful balloons, confetti raining down, neon party lights, disco ball, festive streamers, Hollywood glamour atmosphere, ultra-realistic photography, 4k quality",
     "propsPrompt": "wearing colorful oversized party hats and holding birthday noisemakers",
-    "banner": {
-      "en": "Happy Birthday! 🎂",
-      "es": "¡Feliz Cumpleaños! 🎂",
-      "position": "top",
-      "bgColor": "#1a0a0a",
-      "textColor": "#ff6b6b",
-      "accentColor": "#ffd93d"
-    },
-    "previewEmoji": "🎂"
+    "banner": { "en": "Happy Birthday! 🎂", "es": "¡Feliz Cumpleaños! 🎂", "position": "top", "bgColor": "#1a0a0a", "textColor": "#ff6b6b", "accentColor": "#ffd93d" },
+    "previewEmoji": "🎂",
+    "bgCache": []
+  },
+  "birthday-80s": {
+    "id": "birthday-80s",
+    "category": "birthday",
+    "name": { "en": "80s Retro Party", "es": "Fiesta Retro 80s" },
+    "prompt": "A vibrant 1980s retro neon party venue, cassette tapes, boomboxes, retro arcade games, neon pink and cyan lights, disco ball, checkered floor, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing big 80s hair, neon sunglasses and leg warmers",
+    "banner": { "en": "Totally Radical Birthday! 📼", "es": "¡Cumpleaños Totalmente Radical! 📼", "position": "top", "bgColor": "#0a001a", "textColor": "#ff00ff", "accentColor": "#00ffff" },
+    "previewEmoji": "📼",
+    "bgCache": []
+  },
+  "tropical-fiesta": {
+    "id": "tropical-fiesta",
+    "category": "fiesta",
+    "name": { "en": "Tropical Fiesta", "es": "Fiesta Tropical" },
+    "prompt": "A vibrant tropical beach party with turquoise ocean, white sand, colorful paper lanterns, lush palm trees with string lights, marigold and hibiscus flowers, golden sunset sky, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing colorful oversized sombreros and flower leis",
+    "banner": { "en": "Que Viva la Fiesta! 🌴", "es": "¡Que Viva la Fiesta! 🌴", "position": "top", "bgColor": "#1a3a1a", "textColor": "#ffe066", "accentColor": "#ff6b35" },
+    "previewEmoji": "🌺",
+    "bgCache": []
+  },
+  "mexican-fiesta": {
+    "id": "mexican-fiesta",
+    "category": "fiesta",
+    "name": { "en": "Mexican Fiesta", "es": "Fiesta Mexicana" },
+    "prompt": "A colorful Mexican fiesta celebration with papel picado banners, marigold flowers, colorful lanterns, traditional Talavera tiles, festive market lights, vibrant orange and yellow tones, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing a colorful mariachi sombrero and holding maracas",
+    "banner": { "en": "¡Arriba, Arriba! 🎉", "es": "¡Arriba, Arriba! 🎉", "position": "top", "bgColor": "#2d1000", "textColor": "#ff9900", "accentColor": "#ff3300" },
+    "previewEmoji": "🎉",
+    "bgCache": []
+  },
+  "futuristic-neon": {
+    "id": "futuristic-neon",
+    "category": "futuristic",
+    "name": { "en": "Futuristic Neon", "es": "Neón Futurista" },
+    "prompt": "A cyberpunk futuristic cityscape at night with electric neon signs in pink, blue and purple, rain-slicked reflective streets, holographic projections, towering skyscrapers, sci-fi atmosphere, cinematic lighting, 4k quality",
+    "propsPrompt": "wearing futuristic neon-lit cyber glasses and holographic accessories",
+    "banner": { "en": "Welcome to the Future! ⚡", "es": "¡Bienvenido al Futuro! ⚡", "position": "top", "bgColor": "#0a0a1a", "textColor": "#00f5ff", "accentColor": "#bf00ff" },
+    "previewEmoji": "🌆",
+    "bgCache": []
+  },
+  "space-adventure": {
+    "id": "space-adventure",
+    "category": "futuristic",
+    "name": { "en": "Space Adventure", "es": "Aventura Espacial" },
+    "prompt": "Outer space with Earth visible from orbit, stars and nebula in vivid purple and blue, astronaut space station, galaxies swirling, cinematic sci-fi atmosphere, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing NASA-style astronaut helmets and space suits",
+    "banner": { "en": "To Infinity and Beyond! 🚀", "es": "¡Al Infinito y Más Allá! 🚀", "position": "top", "bgColor": "#000a1a", "textColor": "#ffffff", "accentColor": "#4fc3f7" },
+    "previewEmoji": "🚀",
+    "bgCache": []
   },
   "holiday-magic": {
     "id": "holiday-magic",
-    "name": { "en": "Holiday Magic", "es": "Magia Navideña" },
-    "prompt": "A magical Christmas winter wonderland with snow-covered landscape, giant decorated Christmas tree with golden lights, snowflakes falling, cozy warm cabin in background, festive red and green decorations, ultra-realistic photography, 4k quality",
+    "category": "holiday",
+    "name": { "en": "Christmas Magic", "es": "Magia Navideña" },
+    "prompt": "A magical Christmas winter wonderland with snow-covered landscape, giant decorated Christmas tree with golden lights, snowflakes falling, cozy warm cabin, festive red and green decorations, ultra-realistic photography, 4k quality",
     "propsPrompt": "wearing funny oversized Santa hats and Christmas elf ears",
-    "banner": {
-      "en": "Happy Holidays! 🎄",
-      "es": "¡Feliz Navidad! 🎄",
-      "position": "top",
-      "bgColor": "#0a1a0a",
-      "textColor": "#ffffff",
-      "accentColor": "#ff2020"
-    },
-    "previewEmoji": "🎄"
+    "banner": { "en": "Happy Holidays! 🎄", "es": "¡Feliz Navidad! 🎄", "position": "top", "bgColor": "#0a1a0a", "textColor": "#ffffff", "accentColor": "#ff2020" },
+    "previewEmoji": "🎄",
+    "bgCache": []
+  },
+  "halloween-spooky": {
+    "id": "halloween-spooky",
+    "category": "holiday",
+    "name": { "en": "Halloween Spooky", "es": "Halloween Tenebroso" },
+    "prompt": "A spooky Halloween haunted mansion with glowing jack-o-lanterns, full moon, fog, twisted bare trees, purple and orange lights, cobwebs, bats flying, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing funny Halloween witch hats and vampire capes",
+    "banner": { "en": "Boo! Happy Halloween! 🎃", "es": "¡Bu! ¡Feliz Halloween! 🎃", "position": "top", "bgColor": "#0a0500", "textColor": "#ff9900", "accentColor": "#6600cc" },
+    "previewEmoji": "🎃",
+    "bgCache": []
+  },
+  "superhero": {
+    "id": "superhero",
+    "category": "fun",
+    "name": { "en": "Superhero HQ", "es": "Cuartel de Superhéroes" },
+    "prompt": "A dramatic superhero comic book city skyline at night, lightning in background, dynamic action lighting, heroic atmosphere, bold graphic shadows, ultra-realistic photography with comic style, 4k quality",
+    "propsPrompt": "wearing superhero capes and masks",
+    "banner": { "en": "Save the Day! 🦸", "es": "¡Salva el Día! 🦸", "position": "top", "bgColor": "#0a0a2a", "textColor": "#ffd700", "accentColor": "#ff3300" },
+    "previewEmoji": "🦸",
+    "bgCache": []
+  },
+  "wild-safari": {
+    "id": "wild-safari",
+    "category": "fun",
+    "name": { "en": "Wild Safari", "es": "Safari Salvaje" },
+    "prompt": "An African safari at golden hour, sweeping savanna landscape, acacia trees silhouetted against orange sky, elephants and giraffes in distance, warm dusty atmosphere, ultra-realistic photography, 4k quality",
+    "propsPrompt": "wearing safari explorer hats and binoculars",
+    "banner": { "en": "Wild Adventure Awaits! 🦁", "es": "¡La Aventura Salvaje Espera! 🦁", "position": "top", "bgColor": "#1a0f00", "textColor": "#ffd700", "accentColor": "#ff8c00" },
+    "previewEmoji": "🦁",
+    "bgCache": []
   }
 }
