@@ -3,6 +3,8 @@ const axios = require('axios');
 const path = require('path');
 const fs = require('fs');
 
+fal.config({ credentials: process.env.FAL_API_KEY });
+
 const THEMES_FILE = path.resolve(__dirname, '../../config/themes.json');
 
 function loadThemes() {
@@ -11,8 +13,6 @@ function loadThemes() {
 }
 
 async function generateBackground(imageBuffer, themeId) {
-  fal.config({ credentials: process.env.FAL_API_KEY });
-
   const themes = loadThemes();
   const theme = themes[themeId];
   if (!theme) {
@@ -22,13 +22,13 @@ async function generateBackground(imageBuffer, themeId) {
   const base64Image = imageBuffer.toString('base64');
   const dataUri = `data:image/jpeg;base64,${base64Image}`;
 
-  const result = await fal.subscribe('fal-ai/flux/dev', {
+  const result = await fal.subscribe('fal-ai/bria/background/replace', {
     input: {
-      prompt: theme.prompt,
       image_url: dataUri,
-      image_size: { width: 1800, height: 1200 },
-      num_inference_steps: 28,
-      guidance_scale: 3.5,
+      prompt: theme.prompt,
+      negative_prompt: 'blurry, low quality, distorted',
+      num_inference_steps: 30,
+      guidance_scale: 7.5,
       num_images: 1,
     },
     logs: false,

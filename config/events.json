@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": "demo",
+    "name": "Flash-It Demo Event",
+    "logo": null,
+    "themes": ["elegant-wedding", "corporate-glow", "xv-anos", "tropical-fiesta", "futuristic-neon"],
+    "deliveryChannels": ["sms", "whatsapp", "qr"],
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "usage": []
+  }
+]

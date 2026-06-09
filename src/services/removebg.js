@@ -1,9 +1,9 @@
 const { fal } = require('@fal-ai/client');
 const axios = require('axios');
 
-async function removeBackground(imageBuffer) {
-  fal.config({ credentials: process.env.FAL_API_KEY });
+fal.config({ credentials: process.env.FAL_API_KEY });
 
+async function removeBackground(imageBuffer) {
   const base64Image = imageBuffer.toString('base64');
   const dataUri = `data:image/jpeg;base64,${base64Image}`;
 

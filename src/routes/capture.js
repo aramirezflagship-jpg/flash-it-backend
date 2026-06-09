@@ -4,7 +4,7 @@ const removebg = require('../services/removebg');
 const aiTransform = require('../services/ai-transform');
 const branding = require('../services/branding');
 const storage = require('../services/storage');
-const { readEvents } = require('./admin');
+const { readEvents, writeEvents } = require('./admin');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -41,7 +41,6 @@ router.post('/', upload.single('image'), async (req, res) => {
 
     event.usage = event.usage || [];
     event.usage.push({ photoUrl, createdAt: new Date().toISOString() });
-    const { writeEvents } = require('./admin');
     writeEvents(events);
 
     res.json({ photoUrl, qrUrl });
