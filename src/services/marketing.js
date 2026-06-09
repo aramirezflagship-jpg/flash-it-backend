@@ -1,190 +1,176 @@
-const fs = require('fs');
-const path = require('path');
+const axios = require('axios');
 const twilio = require('twilio');
+const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 
-const CONTACTS_FILE = path.resolve(__dirname, '../../config/contacts.json');
-const MONDAY_BOARD_ID = '18416958691';
+const BOARD_ID = '18417105361';
+const CONTACTS_KEY = 'flash-it/config/contacts.json';
 
-// Column IDs from Monday.com board
-const MONDAY_COLS = {
-  phone:    'phone_mm45s7y6',
-  email:    'email_mm45mpv7',
-  event:    'text_mm45bexv',
-  theme:    'text_mm45q9wd',
-  photoUrl: 'link_mm45p1zj',
-  delivery: 'color_mm45a7dw',
-  promoDate:'date_mm45h89h',
-  notes:    'long_text_mm45fhh8',
-};
-
-// Kanban group IDs
 const GROUPS = {
-  new:       'group_mm455kvx',
-  delivered: 'group_mm45f9qg',
-  captured:  'group_mm45hvav',
-  promoSent: 'group_mm45tgff',
-  converted: 'group_mm457xg7',
-  optedOut:  'group_mm45vpwz',
+  new_guest:        'group_mm45taj1',
+  photo_delivered:  'group_mm45etks',
+  contact_captured: 'group_mm453cf9',
+  promo_sent:       'group_mm45msgy',
+  converted:        'group_mm45kjfn',
+  opted_out:        'group_mm45ctrb',
 };
 
-function readContacts() {
-  try { return JSON.parse(fs.readFileSync(CONTACTS_FILE, 'utf8')); }
-  catch { return []; }
+const COLS = {
+  phone:    'phone_mm45ehtg',
+  email:    'email_mm459bev',
+  event:    'text_mm45bwbr',
+  theme:    'text_mm45kw3c',
+  photoUrl: 'link_mm45sgjm',
+  delivery: 'color_mm45a7k0',
+  date:     'date_mm45t150',
+};
+
+// ─── R2 persistence ───────────────────────────────────────────────────────────
+
+const s3 = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+});
+
+async function loadContacts() {
+  try {
+    const res = await s3.send(new GetObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: CONTACTS_KEY }));
+    const chunks = [];
+    for await (const chunk of res.Body) chunks.push(chunk);
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  } catch (err) {
+    if (err.name === 'NoSuchKey' || err.$metadata?.httpStatusCode === 404) return [];
+    throw err;
+  }
 }
 
-function writeContacts(contacts) {
-  fs.writeFileSync(CONTACTS_FILE, JSON.stringify(contacts, null, 2), 'utf8');
+async function saveContacts(contacts) {
+  await s3.send(new PutObjectCommand({
+    Bucket: process.env.R2_BUCKET_NAME,
+    Key: CONTACTS_KEY,
+    Body: JSON.stringify(contacts, null, 2),
+    ContentType: 'application/json',
+  }));
 }
 
-// Save contact + push to Monday.com Kanban
-async function captureContact({ eventId, eventName, theme, phone, email, photoUrl, deliveryMethod }) {
-  const contacts = readContacts();
-  const existing = contacts.find(c => c.phone === phone || (email && c.email === email));
+// ─── Monday.com ───────────────────────────────────────────────────────────────
 
+async function mondayRequest(query, variables = {}) {
+  const key = process.env.MONDAY_API_KEY;
+  if (!key) return null;
+  try {
+    const res = await axios.post(
+      'https://api.monday.com/v2',
+      { query, variables },
+      { headers: { Authorization: key, 'Content-Type': 'application/json', 'API-Version': '2024-01' } }
+    );
+    return res.data;
+  } catch (err) {
+    console.warn('[marketing] Monday.com error:', err.message);
+    return null;
+  }
+}
+
+async function createMondayItem(contact) {
+  const today = new Date().toISOString().split('T')[0];
+  const columnValues = JSON.stringify({
+    [COLS.phone]:    contact.phone    || '',
+    [COLS.email]:    contact.email    || '',
+    [COLS.event]:    contact.eventId  || '',
+    [COLS.theme]:    contact.theme    || '',
+    [COLS.photoUrl]: contact.photoUrl ? { url: contact.photoUrl, text: 'View Photo' } : '',
+    [COLS.delivery]: contact.method   ? { label: contact.method.toUpperCase() } : '',
+    [COLS.date]:     { date: today },
+  });
+
+  const result = await mondayRequest(
+    `mutation ($boardId: ID!, $groupId: String!, $name: String!, $cols: JSON!) {
+       create_item(board_id: $boardId, group_id: $groupId, item_name: $name, column_values: $cols) { id }
+     }`,
+    { boardId: BOARD_ID, groupId: GROUPS.contact_captured, name: contact.phone || `Guest ${Date.now()}`, cols: columnValues }
+  );
+  return result?.data?.create_item?.id || null;
+}
+
+async function moveMondayItem(itemId, groupId) {
+  await mondayRequest(
+    `mutation ($itemId: ID!, $groupId: String!) {
+       move_item_to_group(item_id: $itemId, group_id: $groupId) { id }
+     }`,
+    { itemId, groupId }
+  );
+}
+
+// ─── Promo message ────────────────────────────────────────────────────────────
+
+const promoText = (eventName) =>
+  `🎉 ¡Gracias por usar Flash-It en ${eventName}! Obtén 20% de descuento en tu próxima reserva → https://flash-it.valuconnect.io/booking — Flash-It by ValuConnect Solutions`;
+
+async function sendPromo(phone, method, eventName) {
+  const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  if (method === 'whatsapp') {
+    const to = phone.startsWith('whatsapp:') ? phone : `whatsapp:${phone}`;
+    return client.messages.create({ body: promoText(eventName), from: process.env.TWILIO_WHATSAPP_FROM, to });
+  }
+  return client.messages.create({ body: promoText(eventName), from: process.env.TWILIO_PHONE_NUMBER, to: phone });
+}
+
+// ─── Public API ───────────────────────────────────────────────────────────────
+
+async function captureContact({ eventId, eventName, phone, email, photoUrl, theme, method }) {
   const contact = {
-    id: existing?.id || `${eventId}-${Date.now()}`,
+    id: `c_${Date.now()}`,
     eventId,
     eventName: eventName || eventId,
-    theme: theme || '',
-    phone: phone || '',
-    email: email || '',
-    photoUrl: photoUrl || '',
-    deliveryMethod: deliveryMethod || 'qr',
-    capturedAt: new Date().toISOString(),
-    promoSentAt: null,
-    mondayItemId: existing?.mondayItemId || null,
-    optedOut: false,
+    phone:     phone    || null,
+    email:     email    || null,
+    photoUrl:  photoUrl || null,
+    theme:     theme    || null,
+    method:    method   || 'sms',
+    capturedAt:   new Date().toISOString(),
+    promoSentAt:  null,
+    mondayItemId: null,
   };
 
-  if (existing) {
-    Object.assign(existing, contact);
-  } else {
-    contacts.push(contact);
+  // Persist to R2
+  try {
+    const all = await loadContacts();
+    all.push(contact);
+    await saveContacts(all);
+  } catch (err) {
+    console.warn('[marketing] R2 save failed:', err.message);
   }
-  writeContacts(contacts);
 
-  // Push to Monday.com asynchronously (non-blocking)
-  pushToMonday(contact).catch(err =>
-    console.warn('[marketing] Monday.com push failed:', err.message)
-  );
+  // Monday.com card
+  try {
+    contact.mondayItemId = await createMondayItem(contact);
+  } catch (err) {
+    console.warn('[marketing] Monday card failed:', err.message);
+  }
+
+  // Send promo (move to Promo Sent on Monday when done)
+  if (phone) {
+    try {
+      await sendPromo(phone, contact.method, contact.eventName);
+      contact.promoSentAt = new Date().toISOString();
+      if (contact.mondayItemId) await moveMondayItem(contact.mondayItemId, GROUPS.promo_sent);
+      // Update R2
+      const all = await loadContacts();
+      const i = all.findIndex(c => c.id === contact.id);
+      if (i !== -1) { all[i].promoSentAt = contact.promoSentAt; await saveContacts(all); }
+    } catch (err) {
+      console.warn('[marketing] Promo failed:', err.message);
+    }
+  }
 
   return contact;
 }
 
-async function pushToMonday(contact) {
-  const apiKey = process.env.MONDAY_API_KEY;
-  if (!apiKey) return;
-
-  const columnValues = JSON.stringify({
-    [MONDAY_COLS.phone]:    contact.phone,
-    [MONDAY_COLS.email]:    { email: contact.email, text: contact.email },
-    [MONDAY_COLS.event]:    contact.eventName,
-    [MONDAY_COLS.theme]:    contact.theme,
-    [MONDAY_COLS.photoUrl]: { url: contact.photoUrl, text: 'View Photo' },
-    [MONDAY_COLS.delivery]: { label: contact.deliveryMethod.toUpperCase() },
-  });
-
-  const groupId = contact.phone && contact.email ? GROUPS.captured : GROUPS.delivered;
-  const guestLabel = contact.phone || contact.email || `Guest-${Date.now()}`;
-
-  const query = `
-    mutation {
-      create_item(
-        board_id: ${MONDAY_BOARD_ID},
-        group_id: "${groupId}",
-        item_name: "${guestLabel}",
-        column_values: ${JSON.stringify(columnValues)}
-      ) { id }
-    }
-  `;
-
-  const res = await fetch('https://api.monday.com/v2', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: apiKey },
-    body: JSON.stringify({ query }),
-  });
-  const data = await res.json();
-
-  if (data?.data?.create_item?.id) {
-    const contacts = readContacts();
-    const c = contacts.find(x => x.id === contact.id);
-    if (c) {
-      c.mondayItemId = data.data.create_item.id;
-      writeContacts(contacts);
-    }
-  }
+async function getContacts() {
+  return loadContacts();
 }
 
-// Send marketing promo message 24h after contact capture
-// Call this from a scheduled job or manually via admin API
-async function sendPromo(contactId) {
-  const contacts = readContacts();
-  const contact = contacts.find(c => c.id === contactId);
-  if (!contact) throw new Error(`Contact ${contactId} not found`);
-  if (contact.optedOut) throw new Error('Contact has opted out');
-  if (contact.promoSentAt) throw new Error('Promo already sent');
-
-  const promoMsg = buildPromoMessage(contact);
-
-  if (contact.phone) {
-    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-    const channel = contact.deliveryMethod === 'whatsapp' ? 'whatsapp' : 'sms';
-
-    if (channel === 'whatsapp') {
-      const to = contact.phone.startsWith('whatsapp:') ? contact.phone : `whatsapp:${contact.phone}`;
-      await client.messages.create({ body: promoMsg, from: process.env.TWILIO_WHATSAPP_FROM, to });
-    } else {
-      await client.messages.create({ body: promoMsg, from: process.env.TWILIO_PHONE_NUMBER, to: contact.phone });
-    }
-  }
-
-  contact.promoSentAt = new Date().toISOString();
-  writeContacts(contacts);
-
-  // Move to "Promo Sent" in Monday.com
-  if (contact.mondayItemId) {
-    updateMondayGroup(contact.mondayItemId, GROUPS.promoSent, contact.promoSentAt)
-      .catch(err => console.warn('[marketing] Monday.com update failed:', err.message));
-  }
-
-  return { success: true, promoSentAt: contact.promoSentAt };
-}
-
-function buildPromoMessage(contact) {
-  const name = contact.eventName || 'tu evento';
-  const es = `¡Hola! 🎉 Gracias por usar Flash-It en ${name}. ¿Listo para la próxima? Reserva ahora y obtén 10% de descuento: https://flash-it.app/booking — Flash-It by ValuConnect Solutions`;
-  return es;
-}
-
-async function updateMondayGroup(itemId, groupId, promoDate) {
-  const apiKey = process.env.MONDAY_API_KEY;
-  if (!apiKey) return;
-
-  const query = `
-    mutation {
-      move_item_to_group(item_id: ${itemId}, group_id: "${groupId}") { id }
-      change_column_value(
-        board_id: ${MONDAY_BOARD_ID},
-        item_id: ${itemId},
-        column_id: "${MONDAY_COLS.promoDate}",
-        value: "${JSON.stringify({ date: promoDate.split('T')[0] })}"
-      ) { id }
-    }
-  `;
-
-  await fetch('https://api.monday.com/v2', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: apiKey },
-    body: JSON.stringify({ query }),
-  });
-}
-
-function getContacts() { return readContacts(); }
-
-function optOut(phone) {
-  const contacts = readContacts();
-  const c = contacts.find(x => x.phone === phone);
-  if (c) { c.optedOut = true; writeContacts(contacts); }
-}
-
-module.exports = { captureContact, sendPromo, getContacts, optOut };
+module.exports = { captureContact, getContacts, GROUPS };

@@ -33,6 +33,7 @@ app.get('/health', (req, res) => {
     R2_BUCKET_NAME:       !!process.env.R2_BUCKET_NAME,
     R2_PUBLIC_URL:        !!process.env.R2_PUBLIC_URL && !process.env.R2_PUBLIC_URL.startsWith('https://your'),
     TWILIO_ACCOUNT_SID:   !!process.env.TWILIO_ACCOUNT_SID && !process.env.TWILIO_ACCOUNT_SID.startsWith('your_'),
+    MONDAY_API_KEY:       !!process.env.MONDAY_API_KEY,
   };
   const allReady = Object.values(keys).every(Boolean);
   res.status(200).json({
