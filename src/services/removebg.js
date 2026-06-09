@@ -1,30 +1,31 @@
 const sharp = require('sharp');
 
-// Try to load @imgly — it downloads ONNX models on first use (~50MB, cached after)
-let imglyRemoveBg = null;
-try {
-  imglyRemoveBg = require('@imgly/background-removal-node').removeBackground;
-} catch {
-  console.warn('[removebg] @imgly not available, will use sharp fallback');
-}
-
+// Background removal — using Remove.bg API (50 free/month)
+// Falls back to original image with alpha if key not set
 async function removeBackground(imageBuffer) {
-  if (imglyRemoveBg) {
+  const apiKey = process.env.REMOVE_BG_API_KEY;
+
+  if (apiKey) {
     try {
-      // @imgly requires RGBA PNG input
-      const pngBuffer = await sharp(imageBuffer).ensureAlpha().png().toBuffer();
-      const blob = new Blob([pngBuffer], { type: 'image/png' });
-      const resultBlob = await imglyRemoveBg(blob, {
-        output: { format: 'image/png', quality: 0.9 },
+      const FormData = require('form-data');
+      const axios = require('axios');
+      const form = new FormData();
+      form.append('image_file', imageBuffer, { filename: 'photo.jpg', contentType: 'image/jpeg' });
+      form.append('size', 'auto');
+
+      const response = await axios.post('https://api.remove.bg/v1.0/removebg', form, {
+        headers: { ...form.getHeaders(), 'X-Api-Key': apiKey },
+        responseType: 'arraybuffer',
+        timeout: 30000,
       });
-      const arrayBuffer = await resultBlob.arrayBuffer();
-      return Buffer.from(arrayBuffer);
+      return Buffer.from(response.data);
     } catch (err) {
-      console.warn('[removebg] @imgly failed, using original image:', err.message);
+      console.warn('[removebg] remove.bg failed:', err.message, '— using original image');
     }
   }
 
-  // Fallback: return original image with alpha channel (no bg removal — photo composites as rectangle)
+  // Fallback: return original image as RGBA PNG (no cutout — composites as rectangle)
+  console.warn('[removebg] No REMOVE_BG_API_KEY set — skipping background removal');
   return sharp(imageBuffer).ensureAlpha().png().toBuffer();
 }
 
