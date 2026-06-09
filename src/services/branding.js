@@ -10,6 +10,75 @@ const LOGO_MAX_HEIGHT = 80;
 const LOGO_MARGIN = 24;
 const DEFAULT_LOGO_PATH = path.resolve(__dirname, '../../assets/flash-it-logo.svg');
 
+const TEXT_OVERLAY_MARGIN = 32;
+
+function escapeXml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function createTextOverlaySvg(overlay) {
+  const { text, position = 'bottom-left', fontSize = 36, color = '#ffffff', shadow = false } = overlay;
+  const escapedText = escapeXml(text);
+  const m = TEXT_OVERLAY_MARGIN;
+
+  // Determine x, y, and text-anchor from position
+  let x, y, textAnchor;
+  const isBottom = position.startsWith('bottom');
+  const isTop = position.startsWith('top');
+  const isLeft = position.endsWith('left');
+  const isRight = position.endsWith('right');
+  const isCenter = position.endsWith('center');
+
+  if (isLeft) {
+    x = m;
+    textAnchor = 'start';
+  } else if (isRight) {
+    x = OUTPUT_WIDTH - m;
+    textAnchor = 'end';
+  } else {
+    x = OUTPUT_WIDTH / 2;
+    textAnchor = 'middle';
+  }
+
+  if (isBottom) {
+    y = OUTPUT_HEIGHT - m;
+  } else {
+    // top — offset down by fontSize so text doesn't clip
+    y = m + fontSize;
+  }
+
+  const shadowEl = shadow
+    ? `<text
+        x="${x + 2}"
+        y="${y + 2}"
+        font-family="'Helvetica Neue', Arial, sans-serif"
+        font-size="${fontSize}"
+        font-weight="bold"
+        fill="rgba(0,0,0,0.6)"
+        text-anchor="${textAnchor}"
+      >${escapedText}</text>`
+    : '';
+
+  return Buffer.from(`
+    <svg width="${OUTPUT_WIDTH}" height="${OUTPUT_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
+      ${shadowEl}
+      <text
+        x="${x}"
+        y="${y}"
+        font-family="'Helvetica Neue', Arial, sans-serif"
+        font-size="${fontSize}"
+        font-weight="bold"
+        fill="${escapeXml(color)}"
+        text-anchor="${textAnchor}"
+      >${escapedText}</text>
+    </svg>
+  `);
+}
+
 function createBannerSvg(text, bgColor, textColor, accentColor) {
   const escapedText = text
     .replace(/&/g, '&amp;')
@@ -93,6 +162,13 @@ async function composite(cutoutBuffer, backgroundBuffer, event, theme) {
     const logoLeft = OUTPUT_WIDTH - logoMeta.width - LOGO_MARGIN;
     const logoTop = OUTPUT_HEIGHT - logoMeta.height - LOGO_MARGIN;
     compositeOps.push({ input: resizedLogo, left: logoLeft, top: logoTop, blend: 'over' });
+  }
+
+  // Text overlays — rendered after logo so they appear on top
+  const textOverlays = Array.isArray(event.textOverlays) ? event.textOverlays : [];
+  for (const overlay of textOverlays) {
+    const overlaySvg = createTextOverlaySvg(overlay);
+    compositeOps.push({ input: overlaySvg, left: 0, top: 0, blend: 'over' });
   }
 
   return sharp(background)

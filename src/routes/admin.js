@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { randomUUID } = require('crypto');
 const adminAuth = require('../middleware/adminAuth');
-const { prebakeTheme } = require('../services/ai-transform');
+const { prebakeTheme, getMemoryCache } = require('../services/ai-transform');
 
 const EVENTS_FILE = path.resolve(__dirname, '../../config/events.json');
 
@@ -32,7 +32,7 @@ router.get('/events', adminAuth, (req, res) => {
 });
 
 router.post('/events', adminAuth, (req, res) => {
-  const { name, logo, themes, deliveryChannels } = req.body;
+  const { name, logo, themes, deliveryChannels, textOverlays } = req.body;
 
   if (!name) {
     return res.status(400).json({ error: 'name is required' });
@@ -45,6 +45,7 @@ router.post('/events', adminAuth, (req, res) => {
     logo: logo || null,
     themes: themes || [],
     deliveryChannels: deliveryChannels || ['sms'],
+    textOverlays: Array.isArray(textOverlays) ? textOverlays : [],
     createdAt: new Date().toISOString(),
     usage: [],
   };
@@ -68,6 +69,45 @@ router.get('/events/:eventId/usage', (req, res) => {
     photoCount: (event.usage || []).length,
     photos: event.usage || [],
   });
+});
+
+// Get text overlays for an event
+// GET /admin/events/:eventId/overlays
+router.get('/events/:eventId/overlays', adminAuth, (req, res) => {
+  const events = readEvents();
+  const event = events.find((e) => e.id === req.params.eventId);
+  if (!event) {
+    return res.status(404).json({ error: 'Event not found' });
+  }
+  res.json({ eventId: event.id, textOverlays: event.textOverlays || [] });
+});
+
+// Replace text overlays for an event
+// PUT /admin/events/:eventId/overlays
+router.put('/events/:eventId/overlays', adminAuth, (req, res) => {
+  const { textOverlays } = req.body;
+
+  if (!Array.isArray(textOverlays)) {
+    return res.status(400).json({ error: 'textOverlays must be an array' });
+  }
+
+  const events = readEvents();
+  const idx = events.findIndex((e) => e.id === req.params.eventId);
+  if (idx === -1) {
+    return res.status(404).json({ error: 'Event not found' });
+  }
+
+  events[idx].textOverlays = textOverlays;
+  writeEvents(events);
+
+  const { usage, ...response } = events[idx];
+  res.json(response);
+});
+
+// Return current in-memory background cache (themeId -> urls[])
+// GET /admin/bgcache
+router.get('/bgcache', adminAuth, (req, res) => {
+  res.json(getMemoryCache());
 });
 
 // Pre-bake backgrounds for a theme (run once before an event for fastest results)

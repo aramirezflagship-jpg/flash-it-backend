@@ -1,97 +1,82 @@
 /**
- * Flash-It Background Pre-baker
- * Run this once before an event to generate and cache background images.
- * Usage: node scripts/prebake.js [count_per_theme]
- * Example: node scripts/prebake.js 3
+ * Flash-It Background Pre-baker (remote)
+ * Triggers pre-baking on the deployed Railway backend via the admin API.
+ *
+ * Usage:
+ *   node scripts/prebake.js [RAILWAY_URL] [ADMIN_KEY] [count_per_theme]
+ *   node scripts/prebake.js https://flash-it-backend-production.up.railway.app YOUR_ADMIN_KEY 3
+ *
+ * Falls back to env vars RAILWAY_URL and ADMIN_KEY if CLI args are omitted.
  */
 
-require('dotenv').config();
-const { fal } = require('@fal-ai/client');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
+const https = require('https');
+const http = require('http');
 
-const THEMES_FILE = path.resolve(__dirname, '../config/themes.json');
-const COUNT = parseInt(process.argv[2]) || 3;
+const RAILWAY_URL = process.argv[2] || process.env.RAILWAY_URL || '';
+const ADMIN_KEY   = process.argv[3] || process.env.ADMIN_KEY   || '';
+const COUNT       = parseInt(process.argv[4] || process.env.COUNT || '3', 10);
 
-fal.config({ credentials: process.env.FAL_API_KEY });
+if (!RAILWAY_URL || !ADMIN_KEY) {
+  console.error('Usage: node scripts/prebake.js <RAILWAY_URL> <ADMIN_KEY> [count]');
+  console.error('   or: RAILWAY_URL=https://... ADMIN_KEY=... node scripts/prebake.js');
+  process.exit(1);
+}
 
-const s3 = new S3Client({
-  region: 'auto',
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-  },
-});
+const base = RAILWAY_URL.replace(/\/$/, '');
+const endpoint = `${base}/admin/prebake-all?count=${COUNT}`;
 
-async function generateImage(prompt) {
-  const result = await fal.subscribe('fal-ai/flux/schnell', {
-    input: {
-      prompt,
-      image_size: { width: 1800, height: 1200 },
-      num_inference_steps: 4,
-      num_images: 1,
-      enable_safety_checker: false,
-    },
-    logs: false,
+console.log(`\nFlash-It Background Pre-baker (remote)`);
+console.log(`  Target : ${base}`);
+console.log(`  Count  : ${COUNT} backgrounds per theme`);
+console.log(`  Calling: POST /admin/prebake-all?count=${COUNT}\n`);
+
+function post(url, adminKey) {
+  return new Promise((resolve, reject) => {
+    const parsed = new URL(url);
+    const lib = parsed.protocol === 'https:' ? https : http;
+
+    const req = lib.request(
+      {
+        hostname: parsed.hostname,
+        port: parsed.port || (parsed.protocol === 'https:' ? 443 : 80),
+        path: parsed.pathname + parsed.search,
+        method: 'POST',
+        headers: {
+          'x-admin-key': adminKey,
+          'Content-Length': 0,
+        },
+      },
+      (res) => {
+        const chunks = [];
+        res.on('data', (c) => chunks.push(c));
+        res.on('end', () => {
+          const body = Buffer.concat(chunks).toString();
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            try { resolve(JSON.parse(body)); }
+            catch { resolve(body); }
+          } else {
+            reject(new Error(`HTTP ${res.statusCode}: ${body}`));
+          }
+        });
+      }
+    );
+
+    req.on('error', reject);
+    req.end();
   });
-  return result.data.images[0].url;
 }
 
-async function uploadToR2(imageUrl, key) {
-  const res = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-  await s3.send(new PutObjectCommand({
-    Bucket: process.env.R2_BUCKET_NAME,
-    Key: key,
-    Body: Buffer.from(res.data),
-    ContentType: 'image/jpeg',
-  }));
-  return `${process.env.R2_PUBLIC_URL}/${key}`;
-}
-
-async function main() {
-  console.log(`\n⚡ Flash-It Background Pre-baker`);
-  console.log(`   Generating ${COUNT} backgrounds per theme...\n`);
-
-  const themes = JSON.parse(fs.readFileSync(THEMES_FILE, 'utf8'));
-  const themeIds = Object.keys(themes);
-  let totalGenerated = 0;
-
-  for (const themeId of themeIds) {
-    const theme = themes[themeId];
-    console.log(`📸 [${themeId}] ${theme.name.en}...`);
-
-    const newUrls = [];
-    for (let i = 0; i < COUNT; i++) {
-      try {
-        process.stdout.write(`   Generating ${i + 1}/${COUNT}...`);
-        const falUrl = await generateImage(theme.prompt);
-        const r2Key = `flash-it/backgrounds/${themeId}/bg_${Date.now()}_${i}.jpg`;
-        const r2Url = await uploadToR2(falUrl, r2Key);
-        newUrls.push(r2Url);
-        process.stdout.write(` ✓\n`);
-        totalGenerated++;
-      } catch (err) {
-        process.stdout.write(` ✗ ${err.message}\n`);
+post(endpoint, ADMIN_KEY)
+  .then((data) => {
+    console.log('Done!', data.message || 'Pre-bake complete.');
+    if (data.results) {
+      for (const [themeId, urls] of Object.entries(data.results)) {
+        console.log(`  ${themeId}: ${urls.length} backgrounds cached`);
       }
     }
-
-    theme.bgCache = [...(theme.bgCache || []).filter(u => u && !u.includes('fal.media')), ...newUrls];
-    themes[themeId] = theme;
-
-    // Save after each theme in case of interruption
-    fs.writeFileSync(THEMES_FILE, JSON.stringify(themes, null, 2), 'utf8');
-    console.log(`   ✅ ${newUrls.length} backgrounds cached for ${theme.name.en}\n`);
-  }
-
-  console.log(`\n🎉 Done! ${totalGenerated} backgrounds generated across ${themeIds.length} themes.`);
-  console.log(`   Commit config/themes.json to lock them in:\n`);
-  console.log(`   git add config/themes.json && git commit -m "chore: pre-baked backgrounds for all themes"\n`);
-}
-
-main().catch(err => {
-  console.error('\n❌ Pre-bake failed:', err.message);
-  process.exit(1);
-});
+    console.log('\nBackground cache is persisted to R2 — no commit needed.');
+  })
+  .catch((err) => {
+    console.error('\nPre-bake failed:', err.message);
+    process.exit(1);
+  });

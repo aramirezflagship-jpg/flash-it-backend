@@ -1,18 +1,30 @@
 const { fal } = require('@fal-ai/client');
 const axios = require('axios');
-const path = require('path');
-const fs = require('fs');
+const { loadBgCache, saveBgCache } = require('./bgcache');
 
 fal.config({ credentials: process.env.FAL_API_KEY });
 
+const path = require('path');
+const fs = require('fs');
+
 const THEMES_FILE = path.resolve(__dirname, '../../config/themes.json');
+
+// Module-level in-memory cache: { [themeId]: string[] }
+// Populated once at startup from R2; avoids hitting R2 on every request.
+let memoryCache = {};
+
+// Load bgCache from R2 at startup (non-blocking — failures are logged, not fatal)
+loadBgCache()
+  .then((cache) => {
+    memoryCache = cache || {};
+    console.log('[bgcache] Loaded from R2:', Object.keys(memoryCache).length, 'themes cached');
+  })
+  .catch((err) => {
+    console.warn('[bgcache] Could not load from R2 at startup, starting empty:', err.message);
+  });
 
 function loadThemes() {
   return JSON.parse(fs.readFileSync(THEMES_FILE, 'utf8'));
-}
-
-function saveThemes(themes) {
-  fs.writeFileSync(THEMES_FILE, JSON.stringify(themes, null, 2), 'utf8');
 }
 
 // Fetch a remote image URL into a buffer
@@ -37,15 +49,16 @@ async function generateBackgroundFast(themePrompt) {
 }
 
 // Main: returns a background image buffer for a given themeId.
-// Uses pre-baked cache if available, otherwise generates with flux/schnell.
+// Checks memoryCache first, then falls back to live generation.
 async function generateBackground(themeId) {
   const themes = loadThemes();
   const theme = themes[themeId];
   if (!theme) throw new Error(`Unknown theme: ${themeId}`);
 
-  // Use pre-baked background if available (fastest path)
-  if (theme.bgCache && theme.bgCache.length > 0) {
-    const url = theme.bgCache[Math.floor(Math.random() * theme.bgCache.length)];
+  // Use pre-baked background from in-memory cache (fastest path)
+  const cached = memoryCache[themeId];
+  if (cached && cached.length > 0) {
+    const url = cached[Math.floor(Math.random() * cached.length)];
     return fetchBuffer(url);
   }
 
@@ -54,7 +67,7 @@ async function generateBackground(themeId) {
   return fetchBuffer(bgUrl);
 }
 
-// Pre-bake N backgrounds for a theme and save URLs to themes.json bgCache.
+// Pre-bake N backgrounds for a theme, update memoryCache, and persist to R2.
 // Called once per theme from /admin/prebake — not on the hot path.
 async function prebakeTheme(themeId, count = 5) {
   const themes = loadThemes();
@@ -65,11 +78,12 @@ async function prebakeTheme(themeId, count = 5) {
     Array.from({ length: count }, () => generateBackgroundFast(theme.prompt))
   );
 
-  theme.bgCache = [...(theme.bgCache || []), ...generated];
-  themes[themeId] = theme;
-  saveThemes(themes);
+  const existing = memoryCache[themeId] || [];
+  memoryCache[themeId] = [...existing, ...generated];
 
-  return theme.bgCache;
+  await saveBgCache(memoryCache);
+
+  return memoryCache[themeId];
 }
 
-module.exports = { generateBackground, prebakeTheme };
+module.exports = { generateBackground, prebakeTheme, getMemoryCache: () => memoryCache };

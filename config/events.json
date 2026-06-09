@@ -6,6 +6,10 @@
     "themes": ["elegant-wedding", "corporate-glow", "xv-anos", "tropical-fiesta", "futuristic-neon"],
     "deliveryChannels": ["sms", "whatsapp", "qr"],
     "createdAt": "2026-01-01T00:00:00.000Z",
+    "textOverlays": [
+      { "text": "#FlashIt2026", "position": "bottom-left", "fontSize": 36, "color": "#ffffff", "shadow": true },
+      { "text": "Flash-It • ValuConnect Solutions", "position": "bottom-right", "fontSize": 28, "color": "#ffffff", "shadow": true }
+    ],
     "usage": []
   }
 ]
