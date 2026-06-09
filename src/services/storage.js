@@ -1,32 +1,31 @@
-const cloudinary = require('cloudinary').v2;
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const QRCode = require('qrcode');
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+const s3 = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
 });
 
-async function uploadBuffer(buffer, folder, publicId, resourceType = 'image') {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder, public_id: publicId, resource_type: resourceType, overwrite: false },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      }
-    );
-    stream.end(buffer);
-  });
+async function uploadBuffer(buffer, key, contentType) {
+  await s3.send(new PutObjectCommand({
+    Bucket: process.env.R2_BUCKET_NAME,
+    Key: key,
+    Body: buffer,
+    ContentType: contentType,
+  }));
+  return `${process.env.R2_PUBLIC_URL}/${key}`;
 }
 
 async function uploadPhoto(photoBuffer, eventId) {
   const timestamp = Date.now();
-  const photoPublicId = `photo_${timestamp}`;
   const folder = `flash-it/events/${eventId}`;
 
-  const photoResult = await uploadBuffer(photoBuffer, folder, photoPublicId);
-  const photoUrl = photoResult.secure_url;
+  const photoKey = `${folder}/photo_${timestamp}.jpg`;
+  const photoUrl = await uploadBuffer(photoBuffer, photoKey, 'image/jpeg');
 
   const qrBuffer = await QRCode.toBuffer(photoUrl, {
     type: 'png',
@@ -35,11 +34,10 @@ async function uploadPhoto(photoBuffer, eventId) {
     color: { dark: '#000000', light: '#ffffff' },
   });
 
-  const qrPublicId = `qr_${timestamp}`;
-  const qrResult = await uploadBuffer(qrBuffer, folder, qrPublicId);
-  const qrUrl = qrResult.secure_url;
+  const qrKey = `${folder}/qr_${timestamp}.png`;
+  const qrUrl = await uploadBuffer(qrBuffer, qrKey, 'image/png');
 
-  return { photoUrl, qrUrl, publicId: photoResult.public_id };
+  return { photoUrl, qrUrl };
 }
 
 module.exports = { uploadPhoto };
