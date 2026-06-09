@@ -1,6 +1,7 @@
 const { fal } = require('@fal-ai/client');
 const axios = require('axios');
 const { loadBgCache, saveBgCache } = require('./bgcache');
+const { getStaticBackground } = require('./staticBackground');
 
 fal.config({ credentials: process.env.FAL_API_KEY });
 
@@ -63,8 +64,14 @@ async function generateBackground(themeId) {
   }
 
   // Fallback: generate live with flux/schnell (turbo — 4 steps)
-  const bgUrl = await generateBackgroundFast(theme.prompt);
-  return fetchBuffer(bgUrl);
+  // If fal.ai fails (no credits/key), use static themed background
+  try {
+    const bgUrl = await generateBackgroundFast(theme.prompt);
+    return fetchBuffer(bgUrl);
+  } catch (err) {
+    console.warn(`[ai-transform] fal.ai unavailable (${err.message}), using static background`);
+    return getStaticBackground(themeId);
+  }
 }
 
 // Pre-bake N backgrounds for a theme, update memoryCache, and persist to R2.
